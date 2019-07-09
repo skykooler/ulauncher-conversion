@@ -1,0 +1,19 @@
+{
+	"required_api_version": "^2.0.0",
+	"name": "Converter",
+	"description": "Convert units",
+	"developer_name": "Skyler Lehmkuhl",
+	"icon": "images/icon.png",
+	"options": {
+		"query_debounce": 0.1
+	},
+	"preferences": [
+		{
+			"id": "convert_kw",
+			"type": "keyword",
+			"name": "Convert",
+			"description": "Convert keyword",
+			"default_value": "convert"
+		}
+	]
+}
