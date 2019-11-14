@@ -4,6 +4,7 @@ from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent
 from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
+from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 import subprocess
 import os
 
@@ -55,10 +56,10 @@ class KeywordQueryEventListener(EventListener):
                                                      description=out.strip(),
                                                      on_enter=HideWindowAction()))
                 else:
+                    result = '%s %s' % (out.splitlines()[0].split("* ")[-1], end)
                     items.append(ExtensionResultItem(icon='images/icon.png',
-                                                     name='%s %s' % (out.splitlines()[0].split("* ")[-1], end),
-                                                     #description=out.splitlines()[0].strip(),
-                                                     on_enter=HideWindowAction()))
+                                                     name=result,
+                                                     on_enter=CopyToClipboardAction(result)))
 
         else:
                 items.append(ExtensionResultItem(icon='images/icon.png',
