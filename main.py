@@ -68,6 +68,16 @@ class KeywordQueryEventListener(EventListener):
                 else:
                     output_unit = '%s %s' % (out, end)
                     items.append(GoodResult(output_unit))
+            else:
+                # Use the default conversion.
+                # TODO: Convert into multiple applicable units (after units has better support).
+                proc = subprocess.Popen(['units', '--terse', query], stdout=subprocess.PIPE)
+                out, err = proc.communicate()
+                out = out.decode("UTF-8").strip()
+                if proc.returncode:
+                    items.append(BadResult(out))
+                else:
+                    items.append(GoodResult(out))
         else:
             items.append(BadResult('Mising library', 'Please install the "units" package.'))
         return RenderResultListAction(items)
