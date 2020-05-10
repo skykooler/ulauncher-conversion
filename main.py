@@ -32,6 +32,19 @@ class ConverterExtension(Extension):
         super(ConverterExtension, self).__init__()
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
 
+def GoodResult(text, desc=''):
+    return ExtensionResultItem(icon='images/icon.png',
+                               name=text,
+                               description=desc,
+                               on_enter=CopyToClipboardAction(text))
+
+def BadResult(text, desc=''):
+    # TODO: Change icon for failing results.
+    return ExtensionResultItem(icon='images/icon.png',
+                               name=text,
+                               description=desc,
+                               on_enter=HideWindowAction())
+
 
 class KeywordQueryEventListener(EventListener):
 
@@ -51,20 +64,12 @@ class KeywordQueryEventListener(EventListener):
                 out, err = proc.communicate()
                 out = out.decode("UTF-8").strip()
                 if "Unknown" in out:
-                    items.append(ExtensionResultItem(icon='images/icon.png',
-                                                     name='Invalid units',
-                                                     description=out,
-                                                     on_enter=HideWindowAction()))
+                    items.append(BadResult('Invalid units', out))
                 else:
                     output_unit = '%s %s' % (out, end)
-                    items.append(ExtensionResultItem(icon='images/icon.png',
-                                                     name=output_unit,
-                                                     on_enter=CopyToClipboardAction(output_unit)))
+                    items.append(GoodResult(output_unit))
         else:
-                items.append(ExtensionResultItem(icon='images/icon.png',
-                                                 name='Missing library',
-                                                 description='Please install the "units" package.',
-                                                 on_enter=HideWindowAction()))
+            items.append(BadResult('Mising library', 'Please install the "units" package.'))
         return RenderResultListAction(items)
 
 if __name__ == '__main__':
