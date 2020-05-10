@@ -2,6 +2,7 @@ from ulauncher.api.client.Extension import Extension
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent
 from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
+from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
 import subprocess
@@ -55,11 +56,10 @@ class KeywordQueryEventListener(EventListener):
                                                      description=out,
                                                      on_enter=HideWindowAction()))
                 else:
+                    output_unit = '%s %s' % (out, end)
                     items.append(ExtensionResultItem(icon='images/icon.png',
-                                                     name='%s %s' % (out, end),
-                                                     #description=out.splitlines()[0].strip(),
-                                                     on_enter=HideWindowAction()))
-
+                                                     name=output_unit,
+                                                     on_enter=CopyToClipboardAction(output_unit)))
         else:
                 items.append(ExtensionResultItem(icon='images/icon.png',
                                                  name='Missing library',
