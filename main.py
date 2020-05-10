@@ -46,17 +46,17 @@ class KeywordQueryEventListener(EventListener):
         if UNITS_EXISTS:
             if " to " in query:
                 start, end = query.split(" to ")
-                proc = subprocess.Popen(['units', start, end], stdout=subprocess.PIPE)
+                proc = subprocess.Popen(['units', '--terse', start, end], stdout=subprocess.PIPE)
                 out, err = proc.communicate()
-                out = out.decode("UTF-8")
+                out = out.decode("UTF-8").strip()
                 if "Unknown" in out:
                     items.append(ExtensionResultItem(icon='images/icon.png',
                                                      name='Invalid units',
-                                                     description=out.strip(),
+                                                     description=out,
                                                      on_enter=HideWindowAction()))
                 else:
                     items.append(ExtensionResultItem(icon='images/icon.png',
-                                                     name='%s %s' % (out.splitlines()[0].split("* ")[-1], end),
+                                                     name='%s %s' % (out, end),
                                                      #description=out.splitlines()[0].strip(),
                                                      on_enter=HideWindowAction()))
 
