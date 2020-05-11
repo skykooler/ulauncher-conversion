@@ -2,6 +2,7 @@ from ulauncher.api.client.Extension import Extension
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent
 from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
+from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
 from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
 import subprocess
@@ -31,6 +32,19 @@ class ConverterExtension(Extension):
         super(ConverterExtension, self).__init__()
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
 
+def GoodResult(text, desc=''):
+    return ExtensionResultItem(icon='images/icon.png',
+                               name=text,
+                               description=desc,
+                               on_enter=CopyToClipboardAction(text))
+
+def BadResult(text, desc=''):
+    # TODO: Change icon for failing results.
+    return ExtensionResultItem(icon='images/icon.png',
+                               name=text,
+                               description=desc,
+                               on_enter=HideWindowAction())
+
 
 class KeywordQueryEventListener(EventListener):
 
@@ -46,25 +60,26 @@ class KeywordQueryEventListener(EventListener):
         if UNITS_EXISTS:
             if " to " in query:
                 start, end = query.split(" to ")
-                proc = subprocess.Popen(['units', start, end], stdout=subprocess.PIPE)
+                proc = subprocess.Popen(['units', '--terse', start, end], stdout=subprocess.PIPE)
                 out, err = proc.communicate()
-                out = out.decode("UTF-8")
+                out = out.decode("UTF-8").strip()
                 if "Unknown" in out:
-                    items.append(ExtensionResultItem(icon='images/icon.png',
-                                                     name='Invalid units',
-                                                     description=out.strip(),
-                                                     on_enter=HideWindowAction()))
+                    items.append(BadResult('Invalid units', out))
                 else:
-                    items.append(ExtensionResultItem(icon='images/icon.png',
-                                                     name='%s %s' % (out.splitlines()[0].split("* ")[-1], end),
-                                                     #description=out.splitlines()[0].strip(),
-                                                     on_enter=HideWindowAction()))
-
+                    output_unit = '%s %s' % (out, end)
+                    items.append(GoodResult(output_unit))
+            else:
+                # Use the default conversion.
+                # TODO: Convert into multiple applicable units (after units has better support).
+                proc = subprocess.Popen(['units', '--terse', query], stdout=subprocess.PIPE)
+                out, err = proc.communicate()
+                out = out.decode("UTF-8").strip()
+                if proc.returncode:
+                    items.append(BadResult(out))
+                else:
+                    items.append(GoodResult(out))
         else:
-                items.append(ExtensionResultItem(icon='images/icon.png',
-                                                 name='Missing library',
-                                                 description='Please install the "units" package.',
-                                                 on_enter=HideWindowAction()))
+            items.append(BadResult('Mising library', 'Please install the "units" package.'))
         return RenderResultListAction(items)
 
 if __name__ == '__main__':
